@@ -1,1 +1,1 @@
-# WsdStudio
+# Word Sense Disambiguation Studio: A Flexible System for WSD Feature Extraction
