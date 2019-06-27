@@ -38,10 +38,11 @@ namespace WsdPreprocessingStudio.DataGeneration.Algorithms
             }
             else
             {
-                var dataSetCount = dataSetGroups.Sum(x => x.DataSets.Count);
+                progress.ThrottleRestartAndComplete = true;
 
-                using (var scope = progress.Scope(dataSetCount, MessageFormat.SavingDataSets_Files))
+                try
                 {
+                    var dataSetCount = dataSetGroups.Sum(x => x.DataSets.Count);
                     var counter = 0;
 
                     foreach (var dataSetGroup in dataSetGroups)
@@ -50,7 +51,7 @@ namespace WsdPreprocessingStudio.DataGeneration.Algorithms
                         {
                             if (dataSet.Data.Count == 0)
                             {
-                                scope.TrySet(++counter);
+                                counter++;
 
                                 continue;
                             }
@@ -62,12 +63,21 @@ namespace WsdPreprocessingStudio.DataGeneration.Algorithms
 
                             using (var writer = new OutputDataWriter(fileName, context))
                             {
-                                writer.WriteAll(dataSet.Data);
+                                progress.SetMessageFormat((c, m) =>
+                                    MessageFormat.SavingDataSet_RecordsAndDataSets(
+                                        c, m, dataSet.Name.ToString() + "/" + dataSetGroup.GroupName,
+                                        counter, dataSetCount));
+
+                                writer.WriteAll(dataSet.Data, progress);
                             }
 
-                            scope.TrySet(++counter);
+                            counter++;
                         }
                     }
+                }
+                finally
+                {
+                    progress.ThrottleRestartAndComplete = false;
                 }
             }
         }

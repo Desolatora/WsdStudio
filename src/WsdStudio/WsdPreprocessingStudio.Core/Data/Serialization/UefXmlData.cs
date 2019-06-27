@@ -45,7 +45,7 @@ namespace WsdPreprocessingStudio.Core.Data.Serialization
     public class UefXmlEncounter
     {
         [XmlAttribute("id")]
-        public string SynsetId { get; set; }
+        public string Id { get; set; }
 
         [XmlAttribute("lemma")]
         public string Lemma { get; set; }
@@ -55,7 +55,7 @@ namespace WsdPreprocessingStudio.Core.Data.Serialization
 
         public override string ToString()
         {
-            return $"id={SynsetId} lemma={Lemma} pos={Pos}";
+            return $"id={Id} lemma={Lemma} pos={Pos}";
         }
     }
 }

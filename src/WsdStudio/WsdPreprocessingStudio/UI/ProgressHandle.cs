@@ -11,6 +11,7 @@ namespace WsdPreprocessingStudio.UI
     public class ProgressHandle : IProgressHandle
     {
         public uint MinUpdateIntervalMilliseconds { get; set; } = 250;
+        public bool ThrottleRestartAndComplete { get; set; }
 
         private Control _owner;
         private ProgressForm _form;
@@ -48,10 +49,18 @@ namespace WsdPreprocessingStudio.UI
         {
             max = Math.Max(max, 1);
 
+            var elapsed = _stopwatch.Elapsed;
+
+            if (ThrottleRestartAndComplete &&
+                (elapsed - _lastUpdateTime).TotalMilliseconds < MinUpdateIntervalMilliseconds)
+                return;
+
             _owner.InvokeIfRequired(() =>
             {
                 SetProgressPrivate(0, max);
             });
+
+            _lastUpdateTime = elapsed;
         }
 
         public bool TrySet(long current, long max)
@@ -79,10 +88,18 @@ namespace WsdPreprocessingStudio.UI
         {
             max = Math.Max(max, 1);
 
+            var elapsed = _stopwatch.Elapsed;
+
+            if (ThrottleRestartAndComplete &&
+                (elapsed - _lastUpdateTime).TotalMilliseconds < MinUpdateIntervalMilliseconds)
+                return;
+
             _owner.InvokeIfRequired(() =>
             {
                 SetProgressPrivate(max, max);
             });
+
+            _lastUpdateTime = elapsed;
         }
 
         public ProgressHandleScope Scope(long max, Func<long, long, string> labelFormat = null)

@@ -4,6 +4,8 @@ namespace WsdPreprocessingStudio.Core.Threading
 {
     public interface IProgressHandle : IDisposable
     {
+        bool ThrottleRestartAndComplete { get; set; }
+
         void SetMessageFormat(Func<long, long, string> messageFormat);
         void Restart(long max);
         bool TrySet(long current, long max);

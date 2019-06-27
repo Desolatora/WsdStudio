@@ -6,30 +6,31 @@ namespace WsdPreprocessingStudio.Core.Helpers
 {
     public static class SynsetHelper
     {
-        public static string GetMeaning(
-            WordDictionary dictionary, Dictionary<string, string> goldKeyDict, 
-            Dictionary<string, string> synsetMapping, string word, string keyId)
+        public static TryGetMeaningStatus TryGetMeaning(
+            WordDictionary dictionary, Dictionary<string, string> goldKeyDictionary, 
+            SynsetDictionary synsetMappings, string word, string keyId, out string meaning)
         {
-            if (string.IsNullOrWhiteSpace(keyId))
-                return string.Empty;
+            meaning = string.Empty;
 
-            if (goldKeyDict.ContainsKey(keyId))
+            if (goldKeyDictionary.ContainsKey(keyId))
             {
-                var synsetIdsRaw = goldKeyDict[keyId];
-
-                if (string.IsNullOrWhiteSpace(synsetIdsRaw))
-                    return string.Empty;
-
-                var synsetIds = synsetIdsRaw.Split(' ');
-
-                return synsetIds
-                    .Where(x => !string.IsNullOrWhiteSpace(x) && synsetMapping.ContainsKey(x))
-                    .Select(x => FromRawMeaning(synsetMapping[x]))
+                var senseKeyList = goldKeyDictionary[keyId];
+                var senseKeys = senseKeyList.Split(' ');
+                var mostFrequentMeaning = senseKeys
+                    .Where(synsetMappings.ContainsKey)
+                    .Select(x => FromRawMeaning(synsetMappings[x]))
                     .OrderBy(x => dictionary.GetByName(word)?.Meanings.GetByName(x)?.Id ?? int.MaxValue)
-                    .FirstOrDefault() ?? string.Empty;
+                    .FirstOrDefault();
+
+                if (string.IsNullOrEmpty(mostFrequentMeaning))
+                    return TryGetMeaningStatus.NoSynsetMappingFound;
+                
+                meaning = mostFrequentMeaning;
+
+                return TryGetMeaningStatus.OK;
             }
 
-            return string.Empty;
+            return TryGetMeaningStatus.IdNotPresentInGoldKeyDictionary;
         }
 
         public static string GetPos(string meaning)
@@ -77,5 +78,12 @@ namespace WsdPreprocessingStudio.Core.Helpers
 
             return rawMeaning.Substring(1) + "-" + pos;
         }
+    }
+
+    public enum TryGetMeaningStatus
+    {
+        OK,
+        IdNotPresentInGoldKeyDictionary,
+        NoSynsetMappingFound
     }
 }

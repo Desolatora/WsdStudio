@@ -3,10 +3,12 @@ using System.IO;
 using System.Linq;
 using WsdPreprocessingStudio.Core.Data;
 using WsdPreprocessingStudio.Core.Data.Collections;
+using WsdPreprocessingStudio.Core.Data.Serialization;
 using WsdPreprocessingStudio.Core.Data.Statistics;
 using WsdPreprocessingStudio.Core.Helpers;
 using WsdPreprocessingStudio.Core.IO.Readers.Input;
 using WsdPreprocessingStudio.Core.IO.Readers.System;
+using WsdPreprocessingStudio.Core.IO.Writers.Misc;
 using WsdPreprocessingStudio.Core.IO.Writers.System;
 using WsdPreprocessingStudio.Core.Resources;
 using WsdPreprocessingStudio.Core.Threading;
@@ -104,12 +106,24 @@ namespace WsdPreprocessingStudio.Core
                 progress.SetMessageFormat(MessageFormat.LoadingTrainData_Files);
 
                 trainData = InputXmlDataReader.Read(
-                    info.TrainDataPath, info.TrainGoldKeyPath, synsetMappings, dictionary, progress);
+                    info.TrainDataPath, info.TrainGoldKeyPath, synsetMappings, dictionary, 
+                    out var trainXmlParseErrors, progress);
+
+                if (trainXmlParseErrors != null && trainXmlParseErrors.Any())
+                    XmlParseErrorWriter.WriteAll(
+                        Path.Combine(destinationPath, FileName.TrainXmlParseErrors + FileExtension.Text),
+                        trainXmlParseErrors);
 
                 progress.SetMessageFormat(MessageFormat.LoadingTestData_Files);
 
                 testData = InputXmlDataReader.Read(
-                    info.TestDataPath, info.TestGoldKeyPath, synsetMappings, dictionary, progress);
+                    info.TestDataPath, info.TestGoldKeyPath, synsetMappings, dictionary, 
+                    out var testXmlParseErrors, progress);
+
+                if (testXmlParseErrors != null && testXmlParseErrors.Any())
+                    XmlParseErrorWriter.WriteAll(
+                        Path.Combine(destinationPath, FileName.TestXmlParseErrors + FileExtension.Text),
+                        testXmlParseErrors);
             }
 
             progress.SetMessageFormat(MessageFormat.AnalyzingData_Files);

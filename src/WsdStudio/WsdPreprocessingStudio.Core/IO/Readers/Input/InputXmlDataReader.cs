@@ -15,7 +15,8 @@ namespace WsdPreprocessingStudio.Core.IO.Readers.Input
     {
         public static TextData[] Read(
             string dataPath, string goldKeyPath, SynsetDictionary synsetMappings,
-            WordDictionary dictionary, IProgressHandle progress = null)
+            WordDictionary dictionary, out XmlParseError[] errors,
+            IProgressHandle progress = null)
         {
             var scope = progress?.Scope(1);
 
@@ -23,12 +24,13 @@ namespace WsdPreprocessingStudio.Core.IO.Readers.Input
             {
                 var result = new List<TextData>();
                 var serializer = new XmlSerializer(typeof(UefXmlData));
+                var xmlParseErrors = new List<XmlParseError>();
 
                 using (var reader = new StreamReader(dataPath))
                 {
                     var goldKeys = File.ReadAllLines(goldKeyPath)
                         .Where(x => !string.IsNullOrWhiteSpace(x))
-                        .Select(x => x.Split(' '))
+                        .Select(x => x.Trim(' ').Split(' '))
                         .Where(x => x.Length > 1)
                         .DistinctBy(x => x[0])
                         .ToDictionary(x => x[0], x => string.Join(" ", x.Skip(1)));
@@ -41,16 +43,38 @@ namespace WsdPreprocessingStudio.Core.IO.Readers.Input
 
                         foreach (var sentence in text.Sentences)
                         {
-                            foreach (var encounter in sentence.Encounters)
+                            for (var i = 0; i < sentence.Encounters.Length; i++)
                             {
-                                encounters.Add(new RawWordEncounter
+                                var encounter = sentence.Encounters[i];
+                                var encounterType = sentence.EnumTypes[i];
+                                var rawWordEncounter = new RawWordEncounter
                                 {
                                     Word = encounter.Lemma,
                                     Pos = encounter.Pos,
-                                    Meaning = SynsetHelper.GetMeaning(
-                                        dictionary, goldKeys, synsetMappings, 
-                                        encounter.Lemma, encounter.SynsetId)
-                                });
+                                    Meaning = string.Empty
+                                };
+
+                                if (encounterType == ItemChoiceType.instance)
+                                {
+                                    var status = SynsetHelper.TryGetMeaning(
+                                        dictionary, goldKeys, synsetMappings,
+                                        encounter.Lemma, encounter.Id, out var meaning);
+
+                                    if (status == TryGetMeaningStatus.OK)
+                                    {
+                                        rawWordEncounter.Meaning = meaning;
+                                    }
+                                    else
+                                    {
+                                        xmlParseErrors.Add(new XmlParseError
+                                        {
+                                            EncounterId = encounter.Id,
+                                            Error = status
+                                        });
+                                    }
+                                }
+
+                                encounters.Add(rawWordEncounter);
                             }
 
                             encounters.Add(RawWordEncounter.EndOfSentenceEncounter);
@@ -59,6 +83,8 @@ namespace WsdPreprocessingStudio.Core.IO.Readers.Input
                         result.Add(new TextData(text.Id, encounters.ToArray()));
                     }
                 }
+
+                errors = xmlParseErrors.ToArray();
 
                 return result.ToArray();
             }

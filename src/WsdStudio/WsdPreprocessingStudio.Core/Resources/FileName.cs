@@ -10,5 +10,7 @@
         public const string DataStatistics = "data-statistics";
         public const string WordEmbeddingsStatistics = "word-embeddings-statistics";
         public const string MeaningEmbeddingsStatistics = "meaning-embeddings-statistics";
+        public const string TrainXmlParseErrors = "train-xml-parse-errors";
+        public const string TestXmlParseErrors = "test-xml-parse-errors";
     }
 }

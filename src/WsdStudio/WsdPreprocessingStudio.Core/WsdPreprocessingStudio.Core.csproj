@@ -68,6 +68,7 @@
     <Compile Include="Data\RawEmbedding.cs" />
     <Compile Include="Data\RawWordEncounter.cs" />
     <Compile Include="Data\Serialization\UefXmlData.cs" />
+    <Compile Include="Data\Serialization\XmlParseError.cs" />
     <Compile Include="Data\Statistics\DataStatistics.cs" />
     <Compile Include="Data\Statistics\DictionaryStatistics.cs" />
     <Compile Include="Data\Statistics\EmbeddingStatistics.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="IO\Readers\System\SystemDictionaryReader.cs" />
     <Compile Include="IO\Readers\System\SystemJsonReader.cs" />
     <Compile Include="IO\Writers\BasicFileWriter.cs" />
+    <Compile Include="IO\Writers\Misc\XmlParseErrorWriter.cs" />
     <Compile Include="IO\Writers\System\SystemJsonWriter.cs" />
     <Compile Include="IO\Writers\System\SystemDataAnalysisWriter.cs" />
     <Compile Include="IO\Writers\System\SystemEmbeddingWriter.cs" />

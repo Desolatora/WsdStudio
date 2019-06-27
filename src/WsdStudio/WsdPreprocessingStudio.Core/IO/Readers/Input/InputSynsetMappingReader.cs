@@ -33,7 +33,7 @@ namespace WsdPreprocessingStudio.Core.IO.Readers.Input
             if (string.IsNullOrWhiteSpace(line))
                 return null;
 
-            var split = line.Split(' ');
+            var split = line.Trim(' ').Split(' ');
 
             if (split.Length != 2)
                 return null;
