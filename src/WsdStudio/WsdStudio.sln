@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WsdPreprocessingStudio.Data
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WsdPreprocessingStudio.SamplePlugin", "WsdPreprocessingStudio.SamplePlugin\WsdPreprocessingStudio.SamplePlugin.csproj", "{6A46BE46-4BA4-4D20-AC89-2B4A058CCD79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WsdPreprocessingStudio.StatisticsPlugin", "WsdPreprocessingStudio.StatisticsPlugin\WsdPreprocessingStudio.StatisticsPlugin.csproj", "{2DA1E2FF-5AA6-4D74-A78F-662AD8118913}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6A46BE46-4BA4-4D20-AC89-2B4A058CCD79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A46BE46-4BA4-4D20-AC89-2B4A058CCD79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A46BE46-4BA4-4D20-AC89-2B4A058CCD79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DA1E2FF-5AA6-4D74-A78F-662AD8118913}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DA1E2FF-5AA6-4D74-A78F-662AD8118913}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DA1E2FF-5AA6-4D74-A78F-662AD8118913}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DA1E2FF-5AA6-4D74-A78F-662AD8118913}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
