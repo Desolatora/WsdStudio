@@ -1,20 +1,32 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using WsdPreprocessingStudio.Core;
 using WsdPreprocessingStudio.Core.Data;
 using WsdPreprocessingStudio.Core.Extensions;
+using WsdPreprocessingStudio.Core.Threading;
 using WsdPreprocessingStudio.DataGeneration.Data;
+using WsdPreprocessingStudio.DataGeneration.Resources;
 
 namespace WsdPreprocessingStudio.DataGeneration.Algorithms
 {
     public class GenerationAlgorithm
     {
         public IList<GeneratedTextData> GenerateRecords(
-            IList<TextData> data, WsdProject project, GenerationInfo info)
+            IList<TextData> data, WsdProject project, GenerationInfo info, IProgressHandle progress)
         {
-            return data
-                .Select(x => new GeneratedTextData(x.TextName, GenerateRecords(x.Data, project, info)))
-                .ToArray();
+            var result = new List<GeneratedTextData>();
+
+            using (var scope = progress.Scope(data.Count, MessageFormat.GeneratingRecords_Texts))
+            {
+                for (var i = 0; i < data.Count; i++)
+                {
+                    scope.TrySet(i);
+
+                    result.Add(new GeneratedTextData(
+                        data[i].TextName, GenerateRecords(data[i].Data, project, info)));
+                }
+            }
+
+            return result;
         }
 
         private IList<RawRecord> GenerateRecords(

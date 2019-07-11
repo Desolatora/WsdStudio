@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using WsdPreprocessingStudio.Core.Data;
 using WsdPreprocessingStudio.Core.Data.Collections;
-using WsdPreprocessingStudio.Core.Data.Serialization;
 using WsdPreprocessingStudio.Core.Data.Statistics;
 using WsdPreprocessingStudio.Core.Helpers;
 using WsdPreprocessingStudio.Core.IO.Readers.Input;

@@ -54,85 +54,83 @@ namespace WsdPreprocessingStudio.DataGeneration
 
             info.AssertIsValid();
 
-            IList<DataSetGroup> dataSetGroups;
-            FeatureSelectionContext context;
+            var handlers = _dataGenerationHandlers
+                .OrderBy(x => x.GetExecutionPriority(project))
+                .ToArray();
 
-            foreach (var handler in _dataGenerationHandlers)
+            foreach (var handler in handlers)
             {
-                handler.BeforeGenerationStarted(project, info);
+                handler.BeforeGenerationStarted(project, info, progress);
             }
 
-            using (progress.Scope(1, MessageFormat.GeneratingData))
+            var reorderedDictionary = _classDeterminator.GetReorderedDictionary(project, info, progress);
+
+            foreach (var handler in handlers)
             {
-                var reorderedDictionary = _classDeterminator.GetReorderedDictionary(project, info);
-
-                foreach (var handler in _dataGenerationHandlers)
-                {
-                    handler.AfterDictionaryReordered(reorderedDictionary, project, info);
-                }
-
-                var dataSets = new Dictionary<DataSetName, DataSetByText>
-                {
-                    [DataSetName.Train] = new DataSetByText(
-                        DataSetName.Train,
-                        _generationAlgorithm.GenerateRecords(project.TrainData, project, info)),
-
-                    [DataSetName.Test] = new DataSetByText(
-                        DataSetName.Test,
-                        _generationAlgorithm.GenerateRecords(project.TestData, project, info))
-                };
-
-                foreach (var handler in _dataGenerationHandlers)
-                {
-                    handler.AfterRecordsGenerated(dataSets, project, info);
-                }
-
-                dataSetGroups = _dataSetGrouper.FormGroups(dataSets, project, info);
-
-                foreach (var handler in _dataGenerationHandlers)
-                {
-                    handler.AfterGroupsFormed(dataSetGroups, project, info);
-                }
-
-                _testOnlySetExtractor.Extract(dataSetGroups, project, info);
-
-                foreach (var handler in _dataGenerationHandlers)
-                {
-                    handler.AfterTestOnlySetExtracted(dataSetGroups, project, info);
-                }
-
-                if (info.ExtractValidationSet)
-                {
-                    _validationSetExtractor.Extract(dataSetGroups, info);
-
-                    foreach (var handler in _dataGenerationHandlers)
-                    {
-                        handler.AfterValidationSetExtracted(dataSetGroups, project, info);
-                    }
-                }
-
-                if (info.ShuffleData)
-                {
-                    _dataSetShuffler.ShuffleData(dataSetGroups);
-
-                    foreach (var handler in _dataGenerationHandlers)
-                    {
-                        handler.AfterDataShuffled(dataSetGroups, project, info);
-                    }
-                }
-
-                context = new FeatureSelectionContext
-                {
-                    GenerationInfo = info,
-                    ReorderedDictionary = reorderedDictionary,
-                    FilteredPosList = new WsdPosList(info.FilteredPosList),
-                    Project = project
-                };
+                handler.AfterDictionaryReordered(reorderedDictionary, project, info, progress);
             }
 
-            foreach (var handler in _dataGenerationHandlers)
+            var dataSets = new Dictionary<DataSetName, DataSetByText>
             {
-                handler.BeforeDataWritten(dataSetGroups, project, info);
+                [DataSetName.Train] = new DataSetByText(
+                    DataSetName.Train,
+                    _generationAlgorithm.GenerateRecords(project.TrainData, project, info, progress)),
+
+                [DataSetName.Test] = new DataSetByText(
+                    DataSetName.Test,
+                    _generationAlgorithm.GenerateRecords(project.TestData, project, info, progress))
+            };
+
+            foreach (var handler in handlers)
+            {
+                handler.AfterRecordsGenerated(dataSets, project, info, progress);
+            }
+
+            var dataSetGroups = _dataSetGrouper.FormGroups(dataSets, project, info, progress);
+
+            foreach (var handler in handlers)
+            {
+                handler.AfterGroupsFormed(dataSetGroups, project, info, progress);
+            }
+
+            _testOnlySetExtractor.Extract(dataSetGroups, project, info, progress);
+
+            foreach (var handler in handlers)
+            {
+                handler.AfterTestOnlySetExtracted(dataSetGroups, project, info, progress);
+            }
+
+            if (info.ExtractValidationSet)
+            {
+                _validationSetExtractor.Extract(dataSetGroups, info, progress);
+
+                foreach (var handler in handlers)
+                {
+                    handler.AfterValidationSetExtracted(dataSetGroups, project, info, progress);
+                }
+            }
+
+            if (info.ShuffleData)
+            {
+                _dataSetShuffler.ShuffleData(dataSetGroups, progress);
+
+                foreach (var handler in handlers)
+                {
+                    handler.AfterDataShuffled(dataSetGroups, project, info, progress);
+                }
+            }
+
+            var context = new FeatureSelectionContext
+            {
+                GenerationInfo = info,
+                ReorderedDictionary = reorderedDictionary,
+                FilteredPosList = new WsdPosList(info.FilteredPosList),
+                Project = project
+            };
+
+            foreach (var handler in handlers)
+            {
+                handler.BeforeDataWritten(dataSetGroups, project, info, progress);
             }
 
             _dataSetWriter.WriteData(info.DestinationFolder, dataSetGroups, context, progress);
@@ -150,9 +148,9 @@ namespace WsdPreprocessingStudio.DataGeneration
                 new GenerationInfoReadable(info),
                 null, false);
 
-            foreach (var handler in _dataGenerationHandlers)
+            foreach (var handler in handlers)
             {
-                handler.AfterGenerationCompleted(project, info);
+                handler.AfterGenerationCompleted(project, info, progress);
             }
         }
     }

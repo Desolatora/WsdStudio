@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using WsdPreprocessingStudio.Core;
 using WsdPreprocessingStudio.Core.Data.Collections;
+using WsdPreprocessingStudio.Core.Threading;
 using WsdPreprocessingStudio.DataGeneration.Data;
 using WsdPreprocessingStudio.DataGeneration.Plugins;
 
@@ -8,16 +9,26 @@ namespace WsdPreprocessingStudio.SamplePlugin
 {
     public class LoggingDataGenerationHandler : IPluginDataGenerationHandler
     {
+        private const string PluginDataKey_ExecutionPriority = "HandlerExecutionPriority";
+
         public string DisplayName => "Logging data generation handler";
 
-        public void AfterDataShuffled(IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info)
+        public int GetExecutionPriority(WsdProject project)
+        {
+            return project.PluginData.GetData<LoggingPlugin, int?>(PluginDataKey_ExecutionPriority) ?? 1;
+        }
+    
+        public void AfterDataShuffled(
+            IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
-            
+
             logger.LogMessage("AfterDataShuffled() called.");
         }
 
-        public void BeforeGenerationStarted(WsdProject project, GenerationInfo info)
+        public void BeforeGenerationStarted(WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
 
@@ -26,7 +37,8 @@ namespace WsdPreprocessingStudio.SamplePlugin
             logger.LogMessage("BeforeGenerationStarted() called.");
         }
 
-        public void AfterGenerationCompleted(WsdProject project, GenerationInfo info)
+        public void AfterGenerationCompleted(WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
             var statistics = project.PluginData.GetData<LoggingPlugin, UsageStatistics>(string.Empty);
@@ -42,42 +54,54 @@ namespace WsdPreprocessingStudio.SamplePlugin
             logger.LogMessage($"    Word element - {statistics.WordElementCounter}");
         }
 
-        public void AfterDictionaryReordered(WordDictionary reorderedDictionary, WsdProject project, GenerationInfo info)
+        public void AfterDictionaryReordered(
+            WordDictionary reorderedDictionary, WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
 
             logger.LogMessage("AfterDictionaryReordered() called.");
         }
 
-        public void AfterGroupsFormed(IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info)
+        public void AfterGroupsFormed(
+            IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
 
             logger.LogMessage("AfterGroupsFormed() called.");
         }
 
-        public void AfterRecordsGenerated(Dictionary<DataSetName, DataSetByText> dataSets, WsdProject project, GenerationInfo info)
+        public void AfterRecordsGenerated(
+            Dictionary<DataSetName, DataSetByText> dataSets, WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
 
             logger.LogMessage("AfterRecordsGenerated() called.");
         }
 
-        public void AfterTestOnlySetExtracted(IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info)
+        public void AfterTestOnlySetExtracted(
+            IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
 
             logger.LogMessage("AfterTestOnlySetExtracted() called.");
         }
 
-        public void AfterValidationSetExtracted(IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info)
+        public void AfterValidationSetExtracted(
+            IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
 
             logger.LogMessage("AfterValidationSetExtracted() called.");
         }
 
-        public void BeforeDataWritten(IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info)
+        public void BeforeDataWritten(
+            IList<DataSetGroup> dataSetGroups, WsdProject project, GenerationInfo info,
+            IProgressHandle progress)
         {
             var logger = project.PluginData.GetData<LoggingPlugin, EventLogger>(string.Empty);
 
